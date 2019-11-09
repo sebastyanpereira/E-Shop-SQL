@@ -1,0 +1,110 @@
+DROP TABLE IF EXISTS user;
+
+CREATE TABLE user
+(
+    id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    login TEXT NOT NULL UNIQUE,
+    name  TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS product_status_type;
+
+CREATE TABLE product_status_type
+(
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS product_category_type;
+
+CREATE TABLE product_category_type
+(
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS product;
+
+CREATE TABLE product
+(
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    name           TEXT    NOT NULL,
+    category_id    INTEGER NOT NULL REFERENCES product_category_type,
+    quantity       INTEGER,
+    status_type_id INTEGER NOT NULL REFERENCES product_status_type,
+    price          INTEGER NOT NULL CHECK ( price >= 0 )
+);
+
+DROP TABLE IF EXISTS order_type;
+
+CREATE TABLE order_type
+(
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS sale_order;
+
+CREATE TABLE sale_order
+(
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL REFERENCES user,
+    order_type_id INTEGER NOT NULL REFERENCES order_type
+);
+
+DROP TABLE IF EXISTS sale;
+
+CREATE TABLE sale
+(
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id   INTEGER NOT NULL REFERENCES sale_order,
+    product_id INTEGER NOT NULL REFERENCES product,
+    quantity   INTEGER NOT NULL CHECK ( quantity > 0 )
+);
+
+INSERT INTO product_status_type(code, name)
+VALUES ('AVAILABLE', 'Доступен'),
+       ('DISCONTINUED', 'Снят с продаж');
+
+INSERT INTO product_category_type(code, name)
+VALUES ('ARMOR', 'Броня'),
+       ('HELMETS', 'Шлемы'),
+       ('GLOVES', 'Перчатки'),
+       ('BOOTS', 'Ботинки'),
+       ('OTHERS', 'Прочее');
+
+INSERT INTO order_type(code, name)
+VALUES ('CURRENT', 'Текущий'),
+       ('CONFIRMED', 'Подтвержден'),
+       ('PAID', 'Оплачен'),
+       ('CANCELED', 'Отменен');
+
+INSERT INTO user(login, name)
+VALUES ('warrior', 'Sasha'),
+       ('wizard', 'Misha'),
+       ('archer', 'Marya'),
+       ('dagger', 'Darya');
+
+INSERT INTO product (name, category_id, quantity, status_type_id, price)
+VALUES ('Перчатки магические', 3, 10, 1, 200),
+       ('Шлем из стали', 2, 6, 1, 500),
+       ('Роба магическая', 1, 2, 1, 1000),
+       ('Броня из адамантина', 1, 2, 1, 2000),
+       ('Ботинки из бронзы', 4, 4, 1, 400),
+       ('Стрелы', 5, 40, 1, 10);
+
+INSERT INTO sale_order(user_id, order_type_id)
+VALUES (1, 1),
+       (2, 2),
+       (3, 1),
+       (4, 3);
+
+INSERT INTO sale(order_id, product_id, quantity)
+VALUES (1, 2, 1),
+       (1, 4, 1),
+       (2, 3, 1),
+       (3, 6, 10),
+       (4, 5, 2);
